@@ -29,7 +29,7 @@ def render_sidebar():
     st.sidebar.title("参数设置")
 
 # 默认值
-DEFAULT_API_KEY = "5f4378d13fb14e9caf3374bc01b3fe4f.rDBXwfdNDp1OJ7h1"  # 你可以自定义默认API Key
+DEFAULT_API_KEY = "sk-xxxxxxxxxxxx"  # 你可以自定义默认API Key
 DEFAULT_MODEL = "glm-4-flash"
 DEFAULT_TEMPERATURE = 0.95
 DEFAULT_TOP_P = 0.70
@@ -47,7 +47,7 @@ use_predefined_key = st.sidebar.radio(
 
 # 输入API Key
 api_key = predefined_api_key if use_predefined_key == "使用预置API Key" else st.sidebar.text_input(
-    "请输入您的API Key：", value=st.session_state.get("api_key", ""), type="password", placeholder="例如：xxxxxxxxxxxxxxxxx"
+    "请输入您的API Key：", value=st.session_state.get("api_key", ""), type="password", placeholder="例如：sk-xxxxxxxxxxxx"
 )
 
 # 选择模型
@@ -109,8 +109,12 @@ st.session_state.top_p = top_p
 st.session_state.max_tokens = max_tokens
 st.session_state.web_search = web_search
 
-# 返回设置的参数
-return api_key, model, temperature, top_p, max_tokens, tools
+# 返回设置的参数的函数
+def get_settings():
+    return api_key, model, temperature, top_p, max_tokens, tools
+
+# 调用获取设置的函数
+settings = get_settings()
 
 def display_conversation():
     """显示对话历史"""
