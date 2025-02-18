@@ -94,12 +94,12 @@ if st.sidebar.button("恢复默认设置"):
     st.sidebar.text("设置已恢复为默认值")
     
     # 保存设置到session_state
-    st.session_state.api_key = api_key
-    st.session_state.model = model
-    st.session_state.temperature = temperature
-    st.session_state.top_p = top_p
-    st.session_state.max_tokens = max_tokens
-    st.session_state.web_search = web_search
+st.session_state.api_key = api_key
+st.session_state.model = model
+st.session_state.temperature = temperature
+st.session_state.top_p = top_p
+st.session_state.max_tokens = max_tokens
+st.session_state.web_search = web_search
 
     # 返回设置的参数
 return api_key, model, temperature, top_p, max_tokens, tools
