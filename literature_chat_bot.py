@@ -74,11 +74,11 @@ def display_conversation():
         if chat['role'] == 'user':
             st.markdown(f"**用户：** {chat['content']}")
         else:
-            st.markdown(f"**机器人：** {chat['content']}")
+            st.markdown(f"**工具人：** {chat['content']}")
 
 def chat_with_bot(client, conversation, user_input, model, temperature, top_p, max_tokens):
     """与机器人聊天，并返回机器人的回答"""
-    with st.spinner("等待机器人回复..."):
+    with st.spinner("工具人正在翻小抄..."):
         try:
             # 添加用户输入到对话历史
             conversation.append({"role": "user", "content": user_input})
@@ -97,7 +97,7 @@ def chat_with_bot(client, conversation, user_input, model, temperature, top_p, m
             conversation.append({"role": "assistant", "content": assistant_response})
 
             # 显示机器人回答
-            st.markdown(f"**机器人：** {assistant_response}")
+            st.markdown(f"**工具人回答：** {assistant_response}")
 
         except Exception as e:
             logging.error(f"发生错误：{e}")
