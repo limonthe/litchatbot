@@ -165,7 +165,7 @@ def main():
     )
 
     # 渲染设置区域
-    api_key, model, temperature, top_p, max_tokens = render_sidebar()
+    api_key, model, temperature, top_p, max_tokens, web_search = render_sidebar()
 
     # 检查并初始化ZhipuAI客户端
     if api_key and model:
