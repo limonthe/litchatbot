@@ -36,7 +36,7 @@ def render_sidebar():
 
     model = st.sidebar.selectbox(
         "选择模型：",
-        ("glm-4-flash", "glm-4-long"),
+        ("glm-4-flash", "glm-4-long", "glm-4-plus"),
         index=("glm-4-flash", "glm-4-long").index(st.session_state.get("model", "glm-4-flash")),
     )
 
