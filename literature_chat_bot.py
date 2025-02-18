@@ -102,7 +102,7 @@ if st.sidebar.button("恢复默认设置"):
     st.session_state.web_search = web_search
 
     # 返回设置的参数
-    return api_key, model, temperature, top_p, max_tokens, tools
+return api_key, model, temperature, top_p, max_tokens, tools
 
 def display_conversation():
     """显示对话历史"""
