@@ -36,9 +36,6 @@ DEFAULT_TOP_P = 0.70
 DEFAULT_MAX_TOKENS = 4095
 DEFAULT_WEB_SEARCH = False  # 默认关闭联网搜索
 
-# 在侧边栏中设置标题
-st.sidebar.title("设置区域")
-
 # 选择API Key方式
 use_predefined_key = st.sidebar.radio(
     "选择API Key方式：", 
@@ -111,7 +108,7 @@ st.session_state.web_search = web_search
 
 # 返回设置的参数的函数
 def get_settings():
-    return api_key, model, temperature, top_p, max_tokens, tools
+    return api_key, model, temperature, top_p, max_tokens, web_search
 
 # 调用获取设置的函数
 settings = get_settings()
