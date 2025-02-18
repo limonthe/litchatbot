@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 # 设置页面标题和图标
 st.set_page_config(
-    page_title="聊天机器人",
+    page_title="俄罗斯文学工具人",
     page_icon="🤖",
     layout="wide",  # 页面布局为宽模式
 )
@@ -22,7 +22,7 @@ def zhipu_chat(api_key, model, temperature, top_p, max_tokens):
 
 def render_sidebar():
     """渲染设置区域并返回设置的参数"""
-    st.sidebar.title("设置区域")
+    st.sidebar.title("参数设置")
 
     # 选择是否使用预置API Key
     use_predefined_key = st.sidebar.radio(
@@ -105,10 +105,10 @@ def chat_with_bot(client, conversation, user_input, model, temperature, top_p, m
 
 def main():
     # 页面标题
-    st.title("欢迎来到聊天机器人！")
+    st.title("尽情提问，即刻咏来！")
     st.markdown(
         """
-        这是一个基于ZhipuAI模型的聊天机器人。请输入您的问题，机器人会尽快回答。
+        这是一个基于ChatGLM模型的ai助手。请输入您的问题，它会尽快回答。
         """
     )
 
