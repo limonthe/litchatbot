@@ -142,6 +142,8 @@ def chat_with_bot(client, conversation, user_input, model, temperature, top_p, m
                 temperature=temperature,
                 top_p=top_p,
                 max_tokens=max_tokens,
+                web_search=web_search,
+                tools=tools,
             )
 
             assistant_response = response.choices[0].message.content
