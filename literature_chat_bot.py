@@ -31,7 +31,7 @@ def render_sidebar():
     )
     
     api_key = predefined_api_key if use_predefined_key == "使用预置API Key" else st.sidebar.text_input(
-        "请输入您的API Key：", value=st.session_state.get("api_key", ""), type="password", placeholder="例如：sk-xxxxxxxxxxxx"
+        "请输入您的API Key：", value=st.session_state.get("api_key", ""), type="password", placeholder="例如：xxxxxxxxxxxxx.xxxxxxxxxxxx"
     )
 
     model = st.sidebar.selectbox(
