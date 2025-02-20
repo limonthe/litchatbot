@@ -40,6 +40,12 @@ def render_sidebar():
         index=("glm-4-flash", "glm-4-long").index(st.session_state.get("model", "glm-4-flash")),
     )
 
+    # 选择是否启用采样
+    do_sample = st.sidebar.checkbox(
+        "启用采样策略 (Do Sample)",
+        value=st.session_state.get("do_sample")
+    )
+    
     temperature = st.sidebar.slider(
         "选择采样温度 (Temperature)：",
         min_value=0.0, max_value=1.0, value=st.session_state.get("temperature", 0.95), step=0.01,
@@ -61,8 +67,19 @@ def render_sidebar():
     st.session_state.temperature = temperature
     st.session_state.top_p = top_p
     st.session_state.max_tokens = max_tokens
+    st.session_state.do_sample = do_sample
 
-    return api_key, model, temperature, top_p, max_tokens
+    # 根据采样设置输出对应的参数
+    def get_sampling_params(do_sample, temperature, top_p):
+        if do_sample:
+            return {'采样温度temperature': temperature, '核采样top_p': top_p}
+        else:
+            return {'采样温度temperature': 1.0, '核采样top_p': 1.0}
+
+    sampling_params = get_sampling_params(do_sample, temperature, top_p)
+    st.write(f"采样参数: {sampling_params}")
+
+    return api_key, model, temperature, top_p, max_tokens, do_sample
 
 def display_conversation():
     """显示对话历史"""
@@ -76,7 +93,7 @@ def display_conversation():
         else:
             st.markdown(f"**工具人：** {chat['content']}")
 
-def chat_with_bot(client, conversation, user_input, model, temperature, top_p, max_tokens):
+def chat_with_bot(client, conversation, user_input, model, temperature, top_p, max_tokens, do_sample):
     """与机器人聊天，并返回机器人的回答"""
     with st.spinner("工具人正在翻小抄..."):
         try:
@@ -90,6 +107,7 @@ def chat_with_bot(client, conversation, user_input, model, temperature, top_p, m
                 temperature=temperature,
                 top_p=top_p,
                 max_tokens=max_tokens,
+                do_sample=do_sample,
             )
 
             assistant_response = response.choices[0].message.content
@@ -108,12 +126,12 @@ def main():
     st.title("尽情提问，即刻咏来！")
     st.markdown(
         """
-        这是一个基于ChatGLM模型的ai助手，主要针对于俄罗斯文艺、国情、俄语知识等。请输入您的问题，它会尽快回答。
+        这是一个基于ChatGLM模型的ai助手，主要针对于俄罗斯文艺、国情、俄语知识等。权且一试，待其回答。
         """
     )
 
     # 渲染设置区域
-    api_key, model, temperature, top_p, max_tokens = render_sidebar()
+    api_key, model, temperature, top_p, max_tokens, do_sample = render_sidebar()
 
     # 检查并初始化ZhipuAI客户端
     if api_key and model:
