@@ -135,7 +135,7 @@ def main():
 
     # 检查并初始化ZhipuAI客户端
     if api_key and model:
-        client = zhipu_chat(api_key, model, temperature, top_p, max_tokens)
+        client = zhipu_chat(api_key, model, temperature, top_p, max_tokens, do_sample)
     else:
         st.warning("请确保您已设置API Key和模型。")
         return
