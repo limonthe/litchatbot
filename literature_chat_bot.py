@@ -123,7 +123,7 @@ def chat_with_bot(client, conversation, user_input, model, temperature, top_p, m
 
 def main():
     # 页面标题
-    st.title("尽情提问，即刻咏来！")
+    st.title("尽情提问，即刻咏来！٩(•̤̀ᵕ•̤́๑)")
     st.markdown(
         """
         这是一个基于ChatGLM模型的ai助手，主要针对于俄罗斯文艺、国情、俄语知识等。权且一试，待其回答。
@@ -182,7 +182,7 @@ def main():
     st.markdown(
         """
         ----
-        提示：如果遇到任何问题，请确保API Key输入正确并且可以正常访问ZhipuAI服务。
+        提示：如遇问题，请确保API Key正确且可正常访问ZhipuAI服务。
         """
     )
 
@@ -201,7 +201,7 @@ st.markdown("""
         }
     </style>
     <div class="footer">
-        仍处开发调试中，望不吝赐教！ 525976102@qq.com。
+        仍处开发调试中，望不吝赐教！ 525976102@qq.com。Ciallo～(∠・ω< )⌒★
     </div>
 """, unsafe_allow_html=True)
 
