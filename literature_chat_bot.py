@@ -168,5 +168,24 @@ def main():
         """
     )
 
+# 页面底部添加说明
+st.markdown("""
+    <style>
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+        }
+    </style>
+    <div class="footer">
+        仍处开发调试中，望不吝赐教！ 525976102@qq.com。
+    </div>
+""", unsafe_allow_html=True)
+
 if __name__ == "__main__":
     main()
