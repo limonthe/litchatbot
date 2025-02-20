@@ -15,7 +15,7 @@ st.set_page_config(
 # 预置的API Key
 predefined_api_key = "5f4378d13fb14e9caf3374bc01b3fe4f.rDBXwfdNDp1OJ7h1"
 
-def zhipu_chat(api_key, model, temperature, top_p, max_tokens):
+def zhipu_chat(api_key, model, temperature, top_p, max_tokens, do_sample):
     """初始化ZhipuAI客户端"""
     client = ZhipuAI(api_key=api_key)
     return client
