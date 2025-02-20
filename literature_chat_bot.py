@@ -176,7 +176,7 @@ def main():
             st.error("请输入有效的内容。")
         else:
             # 调用与机器人聊天的函数
-            chat_with_bot(client, st.session_state.conversation_history, user_input, model, temperature, top_p, max_tokens)
+            chat_with_bot(client, st.session_state.conversation_history, user_input, model, temperature, top_p, max_tokens, do_sample)
 
     # 页面底部说明
     st.markdown(
