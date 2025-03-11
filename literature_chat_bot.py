@@ -1,33 +1,10 @@
 import streamlit as st
 import numpy as np
-import speech_recognition as sr
 from zhipuai import ZhipuAI
 import logging
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)
-
-# 创建语音识别函数
-def listen_to_speech():
-    recognizer = sr.Recognizer()
-    mic = sr.Microphone()
-
-    with mic as source:
-        st.info("请开始讲话...")
-        recognizer.adjust_for_ambient_noise(source)  # 调整噪音环境
-        audio = recognizer.listen(source)
-
-    try:
-        # 使用Google Web Speech API识别语音
-        text = recognizer.recognize_google(audio, language="zh-CN")
-        st.success(f"您说：{text}")
-        return text
-    except sr.UnknownValueError:
-        st.error("无法理解语音。")
-        return ""
-    except sr.RequestError:
-        st.error("语音识别服务不可用。")
-        return ""
 
 # 设置页面标题和图标
 st.set_page_config(
@@ -189,11 +166,7 @@ def main():
     )
 
     # 用户输入框，默认填充选择的提示
-    user_input = st.text_input("用户输入：", value=selected_prompt, placeholder="在这里输入您的问题...")
-    
-    # 添加语音输入按钮
-        if st.button("使用语音输入"):
-        user_input = listen_to_speech()
+    user_input = st.text_input("用户输入：", value=selected_prompt, placeholder="在这里输入您的问题...") 
 
     # 显示用户输入
     st.write(f"您的输入是：{user_input}")
