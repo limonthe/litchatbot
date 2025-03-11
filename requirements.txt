@@ -2,3 +2,4 @@ streamlit
 requests
 zhipuai
 SpeechRecognition
+PyAudio
