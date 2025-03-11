@@ -184,7 +184,7 @@ def main():
              st.write(f"你说的是: {voice_text}")
              # 将识别的语音内容设置为文本框的输入
              user_input = voice_text
-    -    except sr.UnknownValueError:
+         except sr.UnknownValueError:
              st.error("未能理解语音内容，请再试一次。")
          except sr.RequestError:
              st.error("请求错误，请检查网络连接。")
