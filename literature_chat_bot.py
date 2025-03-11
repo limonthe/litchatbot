@@ -1,14 +1,18 @@
 import streamlit as st
+import speech_recognition as sr
 from zhipuai import ZhipuAI
 import logging
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)
 
+# 创建一个SpeechRecognition对象
+recognizer = sr.Recognizer()
+
 # 设置页面标题和图标
 st.set_page_config(
     page_title="俄罗斯文学工具人",
-    page_icon="🤖",
+    page_icon="🤖💬",
     layout="wide",  # 页面布局为宽模式
 )
 
@@ -166,6 +170,27 @@ def main():
 
     # 用户输入框，默认填充选择的提示
     user_input = st.text_input("用户输入：", value=selected_prompt, placeholder="在这里输入您的问题...")
+
+    # 语音输入按钮
+    if st.button("点击开始语音输入"):
+         # 使用麦克风进行语音识别
+         with sr.Microphone() as source:
+             st.text("正在听你说话，请讲...")
+             audio = recognizer.listen(source)
+
+         try:
+             # 识别音频并转换为文本
+             voice_text = recognizer.recognize_google(audio, language="zh-CN")
+             st.write(f"你说的是: {voice_text}")
+             # 将识别的语音内容设置为文本框的输入
+             user_input = voice_text
+    -    except sr.UnknownValueError:
+             st.error("未能理解语音内容，请再试一次。")
+         except sr.RequestError:
+             st.error("请求错误，请检查网络连接。")
+
+    # 显示最终的用户输入（无论是文本输入还是语音输入）
+    st.write(f"你输入的内容是: {user_input}")   
 
     # 发送按钮
     send_button = st.button("发送")
