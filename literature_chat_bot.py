@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 
 # 设置页面标题和图标
 st.set_page_config(
-    page_title="俄罗斯文学工具人",
+    page_title="🤖💬俄罗斯文学工具人",
     page_icon="🤖💬",
     layout="wide",  # 页面布局为宽模式
 )
@@ -167,9 +167,6 @@ def main():
 
     # 用户输入框，默认填充选择的提示
     user_input = st.text_input("用户输入：", value=selected_prompt, placeholder="在这里输入您的问题...") 
-
-    # 显示用户输入
-    st.write(f"您的输入是：{user_input}")
 
     # 发送按钮
     send_button = st.button("发送")
