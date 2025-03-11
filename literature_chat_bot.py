@@ -1,6 +1,5 @@
 import streamlit as st
 import sounddevice as sd
-import portaudio
 import numpy as np
 import speech_recognition as sr
 from zhipuai import ZhipuAI
