@@ -1,5 +1,4 @@
 import streamlit as st
-import sounddevice as sd
 import numpy as np
 import speech_recognition as sr
 from zhipuai import ZhipuAI
@@ -8,25 +7,27 @@ import logging
 # 设置日志
 logging.basicConfig(level=logging.INFO)
 
-# 创建一个自定义的麦克风类，使用 sounddevice
-class SoundDeviceMicrophone(sr.Microphone):
-    def __init__(self, device_index=None, samplerate=None, channels=None, chunk_size=1024):
-        self.device_index = device_index
-        self.samplerate = samplerate
-        self.channels = channels
-        self.chunk_size = chunk_size
-        self.device = sd.default.device = self.device_index
-        self.samplerate = self.samplerate or sd.query_devices(self.device_index, 'input')['default_samplerate']
-        self.channels = self.channels or sd.query_devices(self.device_index, 'input')['max_input_channels']
+# 创建语音识别函数
+def listen_to_speech():
+    recognizer = sr.Recognizer()
+    mic = sr.Microphone()
 
-    def listen(self, source):
-        # 使用 SoundDevice 录音
-        audio_data = sd.rec(int(self.samplerate * 5), samplerate=self.samplerate, channels=self.channels)
-        sd.wait()
-        return np.array(audio_data)
+    with mic as source:
+        st.info("请开始讲话...")
+        recognizer.adjust_for_ambient_noise(source)  # 调整噪音环境
+        audio = recognizer.listen(source)
 
-# 创建一个SpeechRecognition对象
-recognizer = sr.Recognizer()
+    try:
+        # 使用Google Web Speech API识别语音
+        text = recognizer.recognize_google(audio, language="zh-CN")
+        st.success(f"您说：{text}")
+        return text
+    except sr.UnknownValueError:
+        st.error("无法理解语音。")
+        return ""
+    except sr.RequestError:
+        st.error("语音识别服务不可用。")
+        return ""
 
 # 设置页面标题和图标
 st.set_page_config(
@@ -189,27 +190,13 @@ def main():
 
     # 用户输入框，默认填充选择的提示
     user_input = st.text_input("用户输入：", value=selected_prompt, placeholder="在这里输入您的问题...")
+    
+    # 添加语音输入按钮
+        if st.button("使用语音输入"):
+        user_input = listen_to_speech()
 
-    # 语音输入按钮
-    if st.button("点击开始语音输入"):
-         # 使用麦克风进行语音识别
-         with sr.Microphone() as source:
-             st.text("正在听你说话，请讲...")
-             audio = recognizer.listen(source)
-
-         try:
-             # 识别音频并转换为文本
-             voice_text = recognizer.recognize_google(audio, language="zh-CN")
-             st.write(f"你说的是: {voice_text}")
-             # 将识别的语音内容设置为文本框的输入
-             user_input = voice_text
-         except sr.UnknownValueError:
-             st.error("未能理解语音内容，请再试一次。")
-         except sr.RequestError:
-             st.error("请求错误，请检查网络连接。")
-
-    # 显示最终的用户输入（无论是文本输入还是语音输入）
-    st.write(f"你输入的内容是: {user_input}")   
+    # 显示用户输入
+    st.write(f"您的输入是：{user_input}")
 
     # 发送按钮
     send_button = st.button("发送")
