@@ -1,10 +1,29 @@
 import streamlit as st
+import sounddevice as sd
+import numpy as np
 import speech_recognition as sr
 from zhipuai import ZhipuAI
 import logging
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)
+
+# 创建一个自定义的麦克风类，使用 sounddevice
+class SoundDeviceMicrophone(sr.Microphone):
+    def __init__(self, device_index=None, samplerate=None, channels=None, chunk_size=1024):
+        self.device_index = device_index
+        self.samplerate = samplerate
+        self.channels = channels
+        self.chunk_size = chunk_size
+        self.device = sd.default.device = self.device_index
+        self.samplerate = self.samplerate or sd.query_devices(self.device_index, 'input')['default_samplerate']
+        self.channels = self.channels or sd.query_devices(self.device_index, 'input')['max_input_channels']
+
+    def listen(self, source):
+        # 使用 SoundDevice 录音
+        audio_data = sd.rec(int(self.samplerate * 5), samplerate=self.samplerate, channels=self.channels)
+        sd.wait()
+        return np.array(audio_data)
 
 # 创建一个SpeechRecognition对象
 recognizer = sr.Recognizer()
