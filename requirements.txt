@@ -3,4 +3,5 @@ requests
 zhipuai
 SpeechRecognition
 pyaudio
+portaudio
 sounddevice
