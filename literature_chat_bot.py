@@ -60,10 +60,11 @@ def render_sidebar():
         "选择最大Token数量 (Max Tokens)：",
         min_value=1, max_value=4095, value=st.session_state.get("max_tokens", 4095), step=1,
     )
-    
-    # 使用 markdown 和 HTML 生成超链接
-    st.markdown('<a href="https://limonthe.github.io/rebornlL/surface.html" target="_blank">返回学习平台</a>', unsafe_allow_html=True)
-    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/limonthe/litchatbot)"
+
+    "[获取 API key](https://bigmodel.cn/?faitai.com)"
+    "[查看源码](https://github.com/limonthe/litchatbot)"
+    "[![在GitHub代码仓库中查看](https://github.com/codespaces/badge.svg)](https://github.com/limonthe/litchatbot)"
+    "[回到平台页面](https://limonthe.github.io/rebornlL/surface.html)"
 
     # 保存设置到session_state
     st.session_state.api_key = api_key
