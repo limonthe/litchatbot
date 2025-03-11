@@ -23,6 +23,8 @@ def zhipu_chat(api_key, model, temperature, top_p, max_tokens, do_sample):
 def render_sidebar():
     """渲染设置区域并返回设置的参数"""
     st.sidebar.title("参数设置")
+    "[获取 API key](https://bigmodel.cn/?faitai.com)"
+    "[回到平台页面](https://limonthe.github.io/rebornlL/surface.html)"
 
     # 选择是否使用预置API Key
     use_predefined_key = st.sidebar.radio(
@@ -60,12 +62,7 @@ def render_sidebar():
         "选择最大Token数量 (Max Tokens)：",
         min_value=1, max_value=4095, value=st.session_state.get("max_tokens", 4095), step=1,
     )
-
-    "[获取 API key](https://bigmodel.cn/?faitai.com)"
-    "[查看源码](https://github.com/limonthe/litchatbot)"
-    "[![在GitHub代码仓库中查看](https://github.com/codespaces/badge.svg)](https://github.com/limonthe/litchatbot)"
-    "[回到平台页面](https://limonthe.github.io/rebornlL/surface.html)"
-
+     
     # 保存设置到session_state
     st.session_state.api_key = api_key
     st.session_state.model = model
@@ -206,7 +203,7 @@ st.markdown("""
         }
     </style>
     <div class="footer">
-        仍处开发调试中，望不吝赐教！ 525976102@qq.com。Ciallo～(∠・ω< )⌒★
+        仍处开发调试中，望不吝赐教！ 525976102@qq.com。Ciallo～(∠・ω< )⌒★ "[![在GitHub代码仓库中查看](https://github.com/codespaces/badge.svg)](https://github.com/limonthe/litchatbot)"
     </div>
 """, unsafe_allow_html=True)
 
