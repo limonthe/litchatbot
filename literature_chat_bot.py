@@ -22,9 +22,7 @@ def zhipu_chat(api_key, model, temperature, top_p, max_tokens, do_sample):
 
 def render_sidebar():
     """渲染设置区域并返回设置的参数"""
-    st.sidebar.title("参数设置")
-    "[获取 API key](https://bigmodel.cn/?faitai.com)"
-    "[回到平台页面](https://limonthe.github.io/rebornlL/surface.html)"
+    st.sidebar.title("参数设置")   
 
     # 选择是否使用预置API Key
     use_predefined_key = st.sidebar.radio(
@@ -187,6 +185,9 @@ def main():
         提示：如遇问题，请确保API Key正确且可正常访问ZhipuAI服务。
         """
     )
+    "[![在GitHub代码仓库中查看](https://github.com/codespaces/badge.svg)](https://github.com/limonthe/litchatbot)"
+    "[获取 API key](https://bigmodel.cn/?faitai.com)"
+    "[回到平台页面](https://limonthe.github.io/rebornlL/surface.html)"
 
 # 页面底部添加说明
 st.markdown("""
@@ -203,7 +204,7 @@ st.markdown("""
         }
     </style>
     <div class="footer">
-        仍处开发调试中，望不吝赐教！ 525976102@qq.com。Ciallo～(∠・ω< )⌒★ "[![在GitHub代码仓库中查看](https://github.com/codespaces/badge.svg)](https://github.com/limonthe/litchatbot)"
+        仍处开发调试中，望不吝赐教！ 525976102@qq.com。Ciallo～(∠・ω< )⌒★ 
     </div>
 """, unsafe_allow_html=True)
 
