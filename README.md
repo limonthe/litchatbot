@@ -128,7 +128,7 @@ steam:Kpoetry  &ensp; qq:不告诉你w(ﾟДﾟ)w
 
 ### 版权说明
 
-详情请参阅 [LICENSE.txt](https://github.com/limonthe/litchatbot/blob/master/LICENSE.txt)
+详情请参阅 [LICENSE](https://github.com/limonthe/litchatbot/LICENSE)
 
 ### 鸣谢
 
