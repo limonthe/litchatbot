@@ -73,11 +73,12 @@
 
 ```
 filetree 
-├── ARCHITECTURE.md
-├── LICENSE.txt
 ├── README.md
 ├── literature_chat_bot.py
-└── /templates/
+├── requirements.tst
+├── images
+│  ├── logo.jpg
+└── run.bat
 ```
 
 ### 开发的架构 
