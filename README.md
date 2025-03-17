@@ -21,11 +21,11 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">"完美的"README模板</h3>
+  <h3 align="center">俄语学习工具人</h3>
   <p align="center">
-    一个"完美的"README模板去快速开始你的项目！
+    本readme基于<a href="https://github.com/shaojintian/Best_README_template.git">模板</a>
     <br />
-    <a href="https://github.com/limonthe/litchatbot"><strong>探索本项目的文档 »</strong></a>
+    <a href="https://github.com/limonthe/litchatbot"><strong>本项目的文档 »</strong></a>
     <br />
     <br />
     <a href="https://github.com/limonthe/litchatbot">查看Demo</a>
@@ -37,14 +37,12 @@
 
 </p>
 
-
- 本篇README.md面向开发者
  
 ## 目录
 
 - [上手指南](#上手指南)
-  - [开发前的配置要求](#开发前的配置要求)
-  - [安装步骤](#安装步骤)
+  - [配置要求](#配置要求)
+  - [API_KEY获取](#API_KEY获取)
 - [文件目录说明](#文件目录说明)
 - [开发的架构](#开发的架构)
 - [部署](#部署)
@@ -62,15 +60,14 @@
 
 
 ###### 配置要求
-
 1. Windows/Linux/Mac
 2. Chorme内核浏览器
 3. 稳定网络环境
 
 ###### API_KEY获取
-
-1. 注册智谱开放平台 [https://example.com](https://example.com)
+1. 注册智谱开放平台 [https://www.zhipuai.cn/](https://www.zhipuai.cn/)
 2. 在“个人面板”处查询api_key
+3. 注：demo已内置api_key以供体验
 
 ### 文件目录说明
 eg:
@@ -80,24 +77,9 @@ filetree
 ├── ARCHITECTURE.md
 ├── LICENSE.txt
 ├── README.md
-├── /account/
-├── /bbs/
-├── /docs/
-│  ├── /rules/
-│  │  ├── backend.txt
-│  │  └── frontend.txt
-├── manage.py
-├── /oa/
-├── /static/
-├── /templates/
-├── useless.md
-└── /util/
-
+├── literature_chat_bot.py
+└── /templates/
 ```
-
-
-
-
 
 ### 开发的架构 
 
@@ -108,7 +90,8 @@ filetree
 暂无
 
 ### 使用到的框架
-
+- [xxxxxxx](https://www.zhipuai.cn)
+- [xxxxxxx](https://streamlit.io/)
 - [xxxxxxx](https://getbootstrap.com)
 - [xxxxxxx](https://jquery.com)
 - [xxxxxxx](https://laravel.com)
@@ -136,15 +119,15 @@ filetree
 
 ### 作者
 
-xxx@xxxx
+@Limonthe
 
-知乎:xxxx  &ensp; qq:xxxxxx    
+steam:Kpoetry  &ensp; qq:不告诉你w(ﾟДﾟ)w    
 
  *您也可以在贡献者名单中参看所有参与该项目的开发者。*
 
 ### 版权说明
 
-该项目签署了MIT 授权许可，详情请参阅 [LICENSE.txt](https://github.com/limonthe/litchatbot/blob/master/LICENSE.txt)
+详情请参阅 [LICENSE.txt](https://github.com/limonthe/litchatbot/blob/master/LICENSE.txt)
 
 ### 鸣谢
 
