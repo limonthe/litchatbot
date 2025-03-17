@@ -28,7 +28,7 @@
     <a href="https://github.com/limonthe/litchatbot"><strong>本项目的文档 »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/limonthe/litchatbot">查看Demo</a>
+    <a href="https://limonthe-litchatbot.streamlit.app/">查看Demo</a>
     ·
     <a href="https://github.com/limonthe/litchatbot/issues">报告Bug</a>
     ·
