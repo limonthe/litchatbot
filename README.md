@@ -90,11 +90,12 @@ filetree
 暂无
 
 ### 使用到的框架
-- [xxxxxxx](https://www.zhipuai.cn)
-- [xxxxxxx](https://streamlit.io/)
-- [xxxxxxx](https://getbootstrap.com)
-- [xxxxxxx](https://jquery.com)
-- [xxxxxxx](https://laravel.com)
+- [https://www.zhipuai.cn](https://www.zhipuai.cn)
+- [https://streamlit.io/](https://streamlit.io/)
+- [https://layui.dev/](https://layui.dev/)
+- [https://getbootstrap.com](https://getbootstrap.com)
+- [https://jquery.com](https://jquery.com)
+- [https://laravel.com](https://laravel.com)
 
 ### 贡献者
 
