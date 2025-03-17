@@ -1,8 +1,8 @@
 
 
-# ProjectName
+# 基于ChatGLM模型的俄语学习助手
 
-ProjectName and Description
+基于ChatGLM模型与streamlit框架
 
 <!-- PROJECT SHIELDS -->
 
@@ -56,24 +56,21 @@ ProjectName and Description
 - [鸣谢](#鸣谢)
 
 ### 上手指南
+1. 输入问题
+2. 等待机器人响应回答
 
-请将所有链接中的“limonthe/litchatbot”改为“your_github_name/your_repository”
 
 
+###### 配置要求
 
-###### 开发前的配置要求
+1. Windows/Linux/Mac
+2. Chorme内核浏览器
+3. 稳定网络环境
 
-1. xxxxx x.x.x
-2. xxxxx x.x.x
+###### API_KEY获取
 
-###### **安装步骤**
-
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-
-```sh
-git clone https://github.com/limonthe/litchatbot.git
-```
+1. 注册智谱开放平台 [https://example.com](https://example.com)
+2. 在“个人面板”处查询api_key
 
 ### 文件目录说明
 eg:
