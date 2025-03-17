@@ -151,6 +151,6 @@ steam:Kpoetry  &ensp; qq:不告诉你w(ﾟДﾟ)w
 [issues-shield]: https://img.shields.io/github/issues/limonthe/litchatbot.svg?style=flat-square
 [issues-url]: https://img.shields.io/github/issues/limonthe/litchatbot.svg
 [license-shield]: https://img.shields.io/github/license/limonthe/litchatbot.svg?style=flat-square
-[license-url]: https://github.com/limonthe/litchatbot/blob/master/LICENSE.txt
+[license-url]: https://github.com/limonthe/litchatbot/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/shaojintian
