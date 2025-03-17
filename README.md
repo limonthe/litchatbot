@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="https://github.com/limonthe/litchatbot/">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/logo.jpg" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">俄语学习工具人</h3>
@@ -70,7 +70,6 @@
 3. 注：demo已内置api_key以供体验
 
 ### 文件目录说明
-eg:
 
 ```
 filetree 
