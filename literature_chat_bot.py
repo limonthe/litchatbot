@@ -392,7 +392,7 @@ def init_zhipu_client(api_key):
         st.error("API Key无效，请检查后重试")
         return None
 
-# 与AI聊天
+# AI.CHATBOX
 def chat_with_bot(client, user_input):
     """与AI聊天并获取响应"""
     if not user_input.strip():
@@ -618,5 +618,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
