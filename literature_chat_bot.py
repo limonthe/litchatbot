@@ -168,7 +168,7 @@ def init_session_state():
         # 新增知识库相关状态
         "use_retrieval": False,
         "knowledge_id": "",
-        "prompt_template": "从文档\n\"\"\"\n{{knowledge}}\n\"\"\"\n中找问题\n\"\"\"\n{{question}}\n\"\"\"\n的答案，找到答案就仅使用文档语句回答问题，找不到答案就用自身知识回答并且告诉用户该信息不是来自文档。\n不要复述问题，直接开始回答。"
+        "prompt_template": "从文档\n\"\"\"\n{{knowledge}}\n\"\"\"\n中找问题\n\"\"\"\n{{question}}\n\"\"\"\n的答案，找到答案就需要参考文档语句来回答问题，找不到答案就用自身知识回答并且告诉用户该信息不是来自文档。\n不要复述问题，直接开始回答。"
     }
     
     for key, value in defaults.items():
@@ -204,7 +204,7 @@ def render_knowledge_settings():
             
             # 默认提示词模板按钮
             if st.button("恢复默认提示词模板", use_container_width=True):
-                st.session_state.prompt_template = "从文档\n\"\"\"\n{{knowledge}}\n\"\"\"\n中找问题\n\"\"\"\n{{question}}\n\"\"\"\n的答案，找到答案就仅使用文档语句回答问题，找不到答案就用自身知识回答并且告诉用户该信息不是来自文档。\n不要复述问题，直接开始回答。"
+                st.session_state.prompt_template = "从文档\n\"\"\"\n{{knowledge}}\n\"\"\"\n中找问题\n\"\"\"\n{{question}}\n\"\"\"\n的答案，找到答案就需要参考文档语句来回答问题，找不到答案就用自身知识回答并且告诉用户该信息不是来自文档。\n不要复述问题，直接开始回答。"
                 st.rerun()
 
 # 导出对话历史功能
@@ -262,7 +262,7 @@ def render_role_management():
             new_icon = st.selectbox("图标", ["👤", "👑", "🎓", "💼", "📚", "✒️", "🦉", "🌹", "❄️"], index=0)
             new_name = st.text_input("角色名称", key="new_role_name")
             new_desc = st.text_input("简短描述")
-            new_prompt = st.text_area("系统提示词", height=100, placeholder="详细描述角色特点...")
+            new_prompt = st.text_area("系统提示词", height=100, placeholder="角色特点是...")
             
             if st.form_submit_button("💾 保存角色卡", use_container_width=True):
                 if new_name and new_prompt:
@@ -513,7 +513,7 @@ def chat_with_bot(client, user_input):
                     ):
                         content = chunk.choices[0].delta.content
                         full_response += content
-                        message_placeholder.markdown(full_response + "▌")
+                        message_placeholder.markdown(full_response + "▌")# 响应光标
                 
                 # 移除光标符号
                 message_placeholder.markdown(full_response)
@@ -640,7 +640,7 @@ def main():
     # 聊天区域
     if not st.session_state.conversation_history:
         st.info("👋 Привет！👈侧边栏选择角色预设，👇下方可输入问题")
-        # 添加一些俄罗斯文学相关的视觉元素
+        # 添加一些俄罗斯文学相关的视觉元素，这一部分准备删除了（2025/8/15/16:43编辑）
         st.markdown("""
             <div style="text-align:center; margin-top:20px; padding:20px; border-radius:12px; background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);">
                 <h4 style="color:#2c3e50;">📖 俄罗斯文学经典之作（这里不知道该放置什么元素了）</h4>
@@ -678,5 +678,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
