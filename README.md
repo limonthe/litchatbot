@@ -87,7 +87,7 @@ filetree
 
 ### 部署
 
-暂无
+https://limonthe-litchatbot.streamlit.app/#478b4ed3
 
 ### 使用到的框架
 - [https://www.zhipuai.cn](https://www.zhipuai.cn)
