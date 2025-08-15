@@ -28,7 +28,7 @@ st.set_page_config(
 )
 
 # 从环境变量获取预置API Key，或者直接预置
-PREDEFINED_API_KEY = os.getenv("ZHIPU_API_KEY", "")
+PREDEFINED_API_KEY = os.getenv("ZHIPU_API_KEY", "b2d91dd347714bd19221022e62ffe5f4.v7vHaHaUDeN2x5uX")
 
 # 角色卡管理器
 class RoleCardManager:
@@ -152,11 +152,11 @@ class RoleCardManager:
             st.error(f"导入失败: {str(e)}")
             return False
 
-# 初始化会话状态
+# 初始化会话状态 - 添加知识库相关状态
 def init_session_state():
     """初始化会话状态"""
     defaults = {
-        "api_": "",
+        "api_key": "",
         "model": "glm-4.5-flash",
         "conversation_history": [],
         "selected_role": "无角色预设",
@@ -164,12 +164,48 @@ def init_session_state():
         "export_format": "txt",  # 导出格式
         "temperature": 0.95,
         "max_tokens": 2048,
-        "streaming": True
+        "streaming": True,
+        # 新增知识库相关状态
+        "use_retrieval": False,
+        "knowledge_id": "",
+        "prompt_template": "从文档\n\"\"\"\n{{knowledge}}\n\"\"\"\n中找问题\n\"\"\"\n{{question}}\n\"\"\"\n的答案，找到答案就仅使用文档语句回答问题，找不到答案就用自身知识回答并且告诉用户该信息不是来自文档。\n不要复述问题，直接开始回答。"
     }
     
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
+# 渲染知识库设置区域
+def render_knowledge_settings():
+    """渲染知识库检索设置"""
+    with st.sidebar.expander("📚 知识库检索设置", expanded=False):
+        # 启用知识库检索
+        st.session_state.use_retrieval = st.checkbox(
+            "启用知识库检索", 
+            value=st.session_state.use_retrieval,
+            help="启用后AI会优先从您的知识库中检索答案"
+        )
+        
+        if st.session_state.use_retrieval:
+            # 知识库ID输入
+            st.session_state.knowledge_id = st.text_input(
+                "知识库ID",
+                value=st.session_state.knowledge_id,
+                placeholder="请输入您的知识库ID"
+            )
+            
+            # 提示词模板
+            st.session_state.prompt_template = st.text_area(
+                "提示词模板",
+                value=st.session_state.prompt_template,
+                height=150,
+                help="自定义知识库检索的提示模板"
+            )
+            
+            # 默认提示词模板按钮
+            if st.button("恢复默认提示词模板", use_container_width=True):
+                st.session_state.prompt_template = "从文档\n\"\"\"\n{{knowledge}}\n\"\"\"\n中找问题\n\"\"\"\n{{question}}\n\"\"\"\n的答案，找到答案就仅使用文档语句回答问题，找不到答案就用自身知识回答并且告诉用户该信息不是来自文档。\n不要复述问题，直接开始回答。"
+                st.rerun()
 
 # 导出对话历史功能
 def export_conversation():
@@ -182,7 +218,7 @@ def export_conversation():
     
     if export_format == "txt":
         # 文本格式导出
-        content = "俄罗斯文学助手 - 对话历史\n\n"
+        content = "俄罗斯文学工具人 - 对话历史\n\n"
         for msg in st.session_state.conversation_history:
             role = "用户" if msg["role"] == "user" else "助手"
             content += f"[{msg['timestamp']}] {role}: {msg['content']}\n"
@@ -191,7 +227,7 @@ def export_conversation():
     elif export_format == "json":
         # JSON格式导出
         export_data = {
-            "app": "俄罗斯文学助手",
+            "app": "俄罗斯文学工具人",
             "timestamp": datetime.now().isoformat(),
             "history": st.session_state.conversation_history
         }
@@ -284,7 +320,7 @@ def render_role_management():
         else:
             st.info("暂无自定义角色卡")
 
-# 渲染主设置侧边栏
+# 在render_sidebar函数中添加知识库设置
 def render_sidebar():
     """渲染设置区域并返回设置的参数"""
     st.sidebar.title("⚙️ 参数设置")
@@ -336,6 +372,9 @@ def render_sidebar():
                 help="限制响应长度"
             )
     
+    # 知识库设置 - 新增
+    render_knowledge_settings()
+
     # 角色管理
     render_role_management()
     
@@ -434,18 +473,35 @@ def chat_with_bot(client, user_input):
         ai_timestamp = ""  # 初始化时间戳
         
         try:
+            # 准备API参数
+            api_params = {
+                "model": st.session_state.model,
+                "messages": messages_for_api,
+                "temperature": st.session_state.temperature,
+                "max_tokens": st.session_state.max_tokens,
+                "timeout": 30
+            }
+            
+            # 添加知识库工具（如果启用）
+            if st.session_state.use_retrieval and st.session_state.knowledge_id:
+                api_params["tools"] = [
+                    {
+                        "type": "retrieval",
+                        "retrieval": {
+                            "knowledge_id": st.session_state.knowledge_id,
+                            "prompt_template": st.session_state.prompt_template
+                        }
+                    }
+                ]
+            
             # 流式响应处理
             if st.session_state.streaming:
+                # 设置流式参数
+                api_params["stream"] = True
+                
                 # 添加加载指示器
-                with st.spinner("🤔 思考中..."):
-                    response = client.chat.completions.create(
-                        model=st.session_state.model,
-                        messages=messages_for_api,
-                        stream=True,
-                        temperature=st.session_state.temperature,
-                        max_tokens=st.session_state.max_tokens,
-                        timeout=30  # 添加超时设置
-                    )
+                with st.spinner("🔍 检索知识库..." if st.session_state.use_retrieval else "🤔 思考中..."):
+                    response = client.chat.completions.create(**api_params)
                 
                 # 处理流式响应
                 for chunk in response:
@@ -464,8 +520,12 @@ def chat_with_bot(client, user_input):
             
             # 非流式响应处理
             else:
+                # 设置非流式参数
+                api_params["stream"] = False
+                
                 # 添加加载指示器
-                with st.spinner("🤔 思考中..."):
+                with st.spinner("🔍 检索知识库..." if st.session_state.use_retrieval else "🤔 思考中..."):
+                    response = client.chat.completions.create(**api_params)
                     response = client.chat.completions.create(
                         model=st.session_state.model,
                         messages=messages_for_api,
@@ -568,7 +628,7 @@ def main():
     """, unsafe_allow_html=True)
     
     # 标题区域
-    st.title("🤖 俄罗斯文学助手")
+    st.title("🤖 俄罗斯文学工具人")
     st.caption("探索俄罗斯文学世界 · 角色卡增强版")
     
     # 渲染侧边栏
@@ -618,8 +678,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
 
 
