@@ -156,7 +156,7 @@ class RoleCardManager:
 def init_session_state():
     """初始化会话状态"""
     defaults = {
-        "api_key": "",
+        "api_": "",
         "model": "glm-4.5-flash",
         "conversation_history": [],
         "selected_role": "无角色预设",
@@ -303,7 +303,7 @@ def render_sidebar():
         else:
             api_key = st.text_input(
                 "请输入您的API Key：", 
-                value=st.session_state.get("api_key", ""), 
+                value=st.session_state.get("placeholder", ""), 
                 type="password", 
                 placeholder="例如：xxxxxxxxxxxxx.xxxxxxxxxxxx"
             )
@@ -618,6 +618,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
