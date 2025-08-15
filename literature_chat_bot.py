@@ -1,6 +1,6 @@
 from typing import Dict
-from zai import ZhipuAiClient
 from zhipuai import ZhipuAI
+from zai import ZhipuAiClient
 import streamlit as st
 import os
 import json
@@ -600,3 +600,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
