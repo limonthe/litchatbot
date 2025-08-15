@@ -1,4 +1,5 @@
 from typing import Dict
+from zai import ZhipuAiClient
 from zhipuai import ZhipuAI
 import streamlit as st
 import os
@@ -358,16 +359,16 @@ def render_sidebar():
     
     return api_key
 
-# 初始化ZhipuAI客户端
+# 初始化ZhipuAiClient客户端
 def init_zhipu_client(api_key):
-    """初始化ZhipuAI客户端"""
+    """初始化ZhipuAiClient客户端"""
     if not api_key:
         st.error("API Key未设置，请先在侧边栏设置")
         return None
     
     try:
         # 使用官方推荐的初始化方式
-        return ZhipuAI(api_key=api_key)
+        return ZhipuAiClient(api_key=api_key)
     except Exception as e:
         logger.error(f"初始化客户端失败: {e}")
         st.error("API Key无效，请检查后重试")
