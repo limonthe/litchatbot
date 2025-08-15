@@ -1,213 +1,601 @@
-import streamlit as st
-import numpy as np
+from typing import Dict
 from zhipuai import ZhipuAI
+import streamlit as st
+import os
+import json
+from streamlit.components.v1 import html
+from datetime import datetime
+import time
 import logging
 
-# 设置日志
-logging.basicConfig(level=logging.INFO)
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-# 设置页面标题和图标
+# 页面配置
 st.set_page_config(
-    page_title="🤖💬俄罗斯文学工具人",
-    page_icon="🤖💬",
-    layout="wide",  # 页面布局为宽模式
+    page_title="🤖💬 俄罗斯文学助手",
+    page_icon="📚",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'About': "### 俄罗斯文学助手 - 探索俄罗斯文学瑰宝\n版本: 3.2 (API优化版)"
+    }
 )
 
-# 预置的API Key
-predefined_api_key = "5f4378d13fb14e9caf3374bc01b3fe4f.rDBXwfdNDp1OJ7h1"
+# 从环境变量获取预置API Key，或者直接预置
+PREDEFINED_API_KEY = os.getenv("ZHIPU_API_KEY", "b2d91dd347714bd19221022e62ffe5f4.v7vHaHaUDeN2x5uX")
 
-def zhipu_chat(api_key, model, temperature, top_p, max_tokens, do_sample):
-    """初始化ZhipuAI客户端"""
-    client = ZhipuAI(api_key=api_key)
-    return client
+# 角色卡管理器
+class RoleCardManager:
+    def __init__(self, roles_dir: str = "role_cards"):
+        self.roles_dir = roles_dir
+        self.role_cards: Dict[str, dict] = {}
+        self.load_role_cards()
+    
+    def load_role_cards(self):
+        """从目录加载所有角色卡"""
+        if not os.path.exists(self.roles_dir):
+            os.makedirs(self.roles_dir)
+            self.create_default_role_cards()
+        
+        for filename in os.listdir(self.roles_dir):
+            if filename.endswith(".json"):
+                filepath = os.path.join(self.roles_dir, filename)
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        role_data = json.load(f)
+                        role_name = role_data.get("name", filename.split(".")[0])
+                        self.role_cards[role_name] = role_data
+                except Exception as e:
+                    logger.error(f"加载角色卡失败: {str(e)}")
+    
+    def create_default_role_cards(self):
+        """创建默认角色卡"""
+        default_roles = [
+            {
+                "name": "俄罗斯文学教授",
+                "description": "精通俄罗斯文学的学者",
+                "system_prompt": "你是一位俄罗斯文学教授，精通托尔斯泰、陀思妥耶夫斯基等作家的作品。请以专业、严谨的态度回答关于俄罗斯文学的问题，适当引用作品原文。",
+                "icon": "🎓",
+            },
+            {
+                "name": "陀思妥耶夫斯基研究专家",
+                "description": "专注陀氏作品分析",
+                "system_prompt": "你是陀思妥耶夫斯基作品研究专家，特别关注《罪与罚》《卡拉马佐夫兄弟》等作品中的心理描写和哲学思考。回答问题时请深入分析人物心理，引用原文支持观点。",
+                "icon": "📖",
+            },
+            {
+                "name": "白银时代诗人",
+                "description": "象征主义诗歌创作者",
+                "system_prompt": "你是20世纪初俄罗斯白银时代的诗人，擅长象征主义诗歌创作。回答问题时请使用诗意的语言，引用勃洛克、阿赫玛托娃等诗人的作品。",
+                "icon": "✒️",
+            }
+        ]
+        
+        for role in default_roles:
+            filepath = os.path.join(self.roles_dir, f"{role['name']}.json")
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(role, f, ensure_ascii=False, indent=2)
+        self.role_cards = {r["name"]: r for r in default_roles}
+    
+    def get_role_names(self) -> list:
+        """获取所有角色名称"""
+        return ["无角色预设"] + list(self.role_cards.keys())
+    
+    def get_role(self, name: str) -> dict:
+        """获取指定角色卡"""
+        if name == "无角色预设":
+            return None
+        return self.role_cards.get(name)
+    
+    def create_role_card(self, role_data: dict):
+        """创建新角色卡"""
+        name = role_data["name"]
+        filepath = os.path.join(self.roles_dir, f"{name}.json")
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(role_data, f, ensure_ascii=False, indent=2)
+        self.role_cards[name] = role_data
+        return name
+    
+    def delete_role_card(self, name: str):
+        """删除角色卡"""
+        if name in self.role_cards:
+            filepath = os.path.join(self.roles_dir, f"{name}.json")
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            del self.role_cards[name]
+    
+    def import_role_card(self, uploaded_file):
+        """从上传的文件导入角色卡"""
+        try:
+            role_data = json.load(uploaded_file)
+            if not all(key in role_data for key in ["name", "system_prompt"]):
+                st.error("无效的角色卡格式: 缺少必要字段")
+                return False
+            
+            # 检查是否已存在同名角色
+            if role_data["name"] in self.role_cards:
+                st.error(f"角色 '{role_data['name']}' 已存在")
+                return False
+            
+            # 保存角色卡
+            self.create_role_card(role_data)
+            st.success(f"成功导入角色: {role_data['name']}")
+            return True
+        except json.JSONDecodeError:
+            st.error("文件解析失败: 不是有效的JSON格式")
+            return False
+        except Exception as e:
+            st.error(f"导入失败: {str(e)}")
+            return False
 
+# 初始化会话状态
+def init_session_state():
+    """初始化会话状态"""
+    defaults = {
+        "api_key": "",
+        "model": "glm-4.5-flash",
+        "conversation_history": [],
+        "selected_role": "无角色预设",
+        "role_manager": RoleCardManager(),
+        "export_format": "txt",  # 导出格式
+        "temperature": 0.95,
+        "max_tokens": 2048,
+        "streaming": True
+    }
+    
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+# 导出对话历史功能
+def export_conversation():
+    """导出对话历史"""
+    if not st.session_state.conversation_history:
+        st.warning("对话历史为空")
+        return None
+    
+    export_format = st.session_state.export_format
+    
+    if export_format == "txt":
+        # 文本格式导出
+        content = "俄罗斯文学助手 - 对话历史\n\n"
+        for msg in st.session_state.conversation_history:
+            role = "用户" if msg["role"] == "user" else "助手"
+            content += f"[{msg['timestamp']}] {role}: {msg['content']}\n"
+        return content.encode("utf-8"), "text/plain", "conversation.txt"
+    
+    elif export_format == "json":
+        # JSON格式导出
+        export_data = {
+            "app": "俄罗斯文学助手",
+            "timestamp": datetime.now().isoformat(),
+            "history": st.session_state.conversation_history
+        }
+        content = json.dumps(export_data, ensure_ascii=False, indent=2)
+        return content.encode("utf-8"), "application/json", "conversation.json"
+
+# 渲染角色卡管理侧边栏
+def render_role_management():
+    """渲染角色卡管理界面"""
+    role_manager = st.session_state.role_manager
+    
+    # 角色选择
+    selected_role = st.sidebar.selectbox(
+        "🎭 选择角色风格：",
+        role_manager.get_role_names(),
+        index=role_manager.get_role_names().index(st.session_state.selected_role),
+        key="role_select"
+    )
+    st.session_state.selected_role = selected_role
+    
+    # 显示角色描述
+    if selected_role != "无角色预设":
+        role_card = role_manager.get_role(selected_role)
+        if role_card:
+            st.sidebar.caption(f"{role_card.get('icon', '👤')} {role_card.get('description', '')}")
+    
+    # 角色卡片管理
+    with st.sidebar.expander("🛠️ 角色卡片管理", expanded=False):
+        # 创建新角色卡
+        with st.form("new_role_form", clear_on_submit=True):
+            st.subheader("➕ 创建新角色卡")
+            new_icon = st.selectbox("图标", ["👤", "👑", "🎓", "💼", "📚", "✒️", "🦉", "🌹", "❄️"], index=0)
+            new_name = st.text_input("角色名称", key="new_role_name")
+            new_desc = st.text_input("简短描述")
+            new_prompt = st.text_area("系统提示词", height=100, placeholder="详细描述角色特点...")
+            
+            if st.form_submit_button("💾 保存角色卡", use_container_width=True):
+                if new_name and new_prompt:
+                    role_data = {
+                        "name": new_name,
+                        "icon": new_icon,
+                        "description": new_desc,
+                        "system_prompt": new_prompt,
+                        "created_at": str(datetime.now())
+                    }
+                    role_manager.create_role_card(role_data)
+                    st.success(f"角色卡 '{new_name}' 创建成功！")
+                    st.session_state.selected_role = new_name
+                    st.rerun()
+                else:
+                    st.warning("请填写名称和系统提示词")
+        
+        # 导入角色卡
+        st.subheader("📤 导入角色卡")
+        uploaded_file = st.file_uploader(
+            "上传角色卡(JSON格式)", 
+            type=["json"],
+            accept_multiple_files=False,
+            key="role_uploader"
+        )
+        if uploaded_file is not None:
+            if role_manager.import_role_card(uploaded_file):
+                st.rerun()
+        
+        # 管理现有角色卡
+        st.subheader("📋 管理角色卡")
+        if role_manager.role_cards:
+            manage_role = st.selectbox(
+                "选择角色",
+                list(role_manager.role_cards.keys()),
+                key="manage_role_select"
+            )
+            
+            if manage_role:
+                role_card = role_manager.get_role(manage_role)
+                st.markdown(f"**{role_card['icon']} {role_card['name']}**")
+                st.caption(role_card['description'])
+                
+                cols = st.columns(2)
+                with cols[0]:
+                    if st.button("👤 使用此角色", key=f"manage_use_{manage_role}", use_container_width=True):
+                        st.session_state.selected_role = manage_role
+                        st.rerun()
+                with cols[1]:
+                    if st.button("🗑️ 删除", key=f"delete_{manage_role}", use_container_width=True):
+                        role_manager.delete_role_card(manage_role)
+                        st.success(f"已删除 '{manage_role}'")
+                        st.session_state.selected_role = "无角色预设"
+                        st.rerun()
+        else:
+            st.info("暂无自定义角色卡")
+
+# 渲染主设置侧边栏
 def render_sidebar():
     """渲染设置区域并返回设置的参数"""
-    st.sidebar.title("参数设置")   
-
-    # 选择是否使用预置API Key
-    use_predefined_key = st.sidebar.radio(
-        "选择API Key方式：", 
-        ("使用预置API Key", "自定义API Key")
-    )
+    st.sidebar.title("⚙️ 参数设置")
     
-    api_key = predefined_api_key if use_predefined_key == "使用预置API Key" else st.sidebar.text_input(
-        "请输入您的API Key：", value=st.session_state.get("api_key", ""), type="password", placeholder="例如：xxxxxxxxxxxxx.xxxxxxxxxxxx"
-    )
-
-    model = st.sidebar.selectbox(
-        "选择模型：",
-        ("glm-4-flash", "glm-4-long", "glm-4-plus"),
-        index=("glm-4-flash", "glm-4-long").index(st.session_state.get("model", "glm-4-flash")),
-    )
-
-    # 选择是否启用采样
-    do_sample = st.sidebar.checkbox(
-        "启用采样策略 (Do Sample)",
-        value=st.session_state.get("do_sample")
-    )
+    # API设置
+    with st.sidebar.expander("🔑 API 设置", expanded=True):
+        use_predefined_key = st.radio(
+            "API Key 来源：", 
+            ("使用预置API Key", "自定义API Key"),
+            index=0
+        )
+        
+        if use_predefined_key == "使用预置API Key":
+            api_key = PREDEFINED_API_KEY
+            st.info("预置API Key功能或受限")
+        else:
+            api_key = st.text_input(
+                "请输入您的API Key：", 
+                value=st.session_state.get("api_key", ""), 
+                type="password", 
+                placeholder="例如：xxxxxxxxxxxxx.xxxxxxxxxxxx"
+            )
     
-    temperature = st.sidebar.slider(
-        "选择采样温度 (Temperature)：",
-        min_value=0.0, max_value=1.0, value=st.session_state.get("temperature", 0.95), step=0.01,
-    )
-
-    top_p = st.sidebar.slider(
-        "选择核采样 (Top P)：",
-        min_value=0.0, max_value=1.0, value=st.session_state.get("top_p", 0.70), step=0.01,
-    )
-
-    max_tokens = st.sidebar.number_input(
-        "选择最大Token数量 (Max Tokens)：",
-        min_value=1, max_value=4095, value=st.session_state.get("max_tokens", 4095), step=1,
-    )
-     
-    # 保存设置到session_state
+    # 模型参数
+    with st.sidebar.expander("🧠 模型参数", expanded=True):
+        model = st.selectbox(
+            "选择模型：",
+            ("glm-4.5-flash", "glm-4.5", "glm-z1-air"),
+            index=0
+        )
+        
+        st.session_state.streaming = st.checkbox(
+            "启用流式响应", 
+            value=True,
+            help="启用后响应会逐字显示"
+        )
+        
+        cols = st.columns(2)
+        with cols[0]:
+            temperature = st.slider(
+                "采样温度：",
+                min_value=0.0, max_value=1.0, value=st.session_state.temperature, step=0.01,
+                help="值越高，输出越随机"
+            )
+        with cols[1]:
+            max_tokens = st.slider(
+                "最大Token：",
+                min_value=128, max_value=4096, value=st.session_state.max_tokens, step=128,
+                help="限制响应长度"
+            )
+    
+    # 角色管理
+    render_role_management()
+    
+    # 对话管理
+    with st.sidebar.expander("💬 对话管理", expanded=False):
+        # 导出格式选择
+        st.session_state.export_format = st.radio(
+            "导出格式：",
+            ("txt", "json"),
+            index=0,
+            horizontal=True
+        )
+        
+        # 导出按钮
+        export_data = export_conversation()
+        if export_data:
+            st.download_button(
+                label="💾 导出对话历史",
+                data=export_data[0],
+                file_name=export_data[2],
+                mime=export_data[1],
+                use_container_width=True
+            )
+        
+        if st.button("🧹 清除对话历史", use_container_width=True):
+            st.session_state.conversation_history = []
+            st.rerun()
+        
+        if st.button("🔄 重置所有设置", use_container_width=True):
+            for key in list(st.session_state.keys()):
+                if key != "role_manager":
+                    del st.session_state[key]
+            st.rerun()
+    
     st.session_state.api_key = api_key
     st.session_state.model = model
     st.session_state.temperature = temperature
-    st.session_state.top_p = top_p
     st.session_state.max_tokens = max_tokens
-    st.session_state.do_sample = do_sample
+    
+    return api_key
 
-    # 根据采样设置输出对应的参数
-    def get_sampling_params(do_sample, temperature, top_p):
-        if do_sample:
-            return {'采样温度temperature': temperature, '核采样top_p': top_p}
-        else:
-            return {'采样温度temperature': 1.0, '核采样top_p': 1.0}
+# 初始化ZhipuAI客户端
+def init_zhipu_client(api_key):
+    """初始化ZhipuAI客户端"""
+    if not api_key:
+        st.error("API Key未设置，请先在侧边栏设置")
+        return None
+    
+    try:
+        # 使用官方推荐的初始化方式
+        return ZhipuAI(api_key=api_key)
+    except Exception as e:
+        logger.error(f"初始化客户端失败: {e}")
+        st.error("API Key无效，请检查后重试")
+        return None
 
-    sampling_params = get_sampling_params(do_sample, temperature, top_p)
-    st.write(f"采样参数: {sampling_params}")
-
-    return api_key, model, temperature, top_p, max_tokens, do_sample
-
-def display_conversation():
-    """显示对话历史"""
-    if 'conversation_history' not in st.session_state:
-        st.session_state.conversation_history = []
-
-    # 显示所有的问答历史
-    for chat in st.session_state.conversation_history:
-        if chat['role'] == 'user':
-            st.markdown(f"**用户：** {chat['content']}")
-        else:
-            st.markdown(f"**工具人：** {chat['content']}")
-
-def chat_with_bot(client, conversation, user_input, model, temperature, top_p, max_tokens, do_sample):
-    """与机器人聊天，并返回机器人的回答"""
-    with st.spinner("工具人正在翻小抄..."):
-        try:
-            # 添加用户输入到对话历史
-            conversation.append({"role": "user", "content": user_input})
-
-            # 进行API调用，获取机器人响应
-            response = client.chat.completions.create(
-                model=model,
-                messages=conversation,
-                temperature=temperature,
-                top_p=top_p,
-                max_tokens=max_tokens,
-                do_sample=do_sample,
-            )
-
-            assistant_response = response.choices[0].message.content
-            # 添加机器人的回答到历史记录
-            conversation.append({"role": "assistant", "content": assistant_response})
-
-            # 显示机器人回答
-            st.markdown(f"**工具人回答：** {assistant_response}")
-
-        except Exception as e:
-            logging.error(f"发生错误：{e}")
-            st.error("发生错误，请重试。")
-
-def main():
-    # 页面标题
-    st.title("尽情提问，即刻咏来！٩(•̤̀ᵕ•̤́๑)")
-    st.markdown(
-        """
-        这是一个基于ChatGLM模型的ai助手，主要针对于俄罗斯文艺、国情、俄语知识等。权且一试，待其回答。
-        """
-    )
-
-    # 渲染设置区域
-    api_key, model, temperature, top_p, max_tokens, do_sample = render_sidebar()
-
-    # 检查并初始化ZhipuAI客户端
-    if api_key and model:
-        client = zhipu_chat(api_key, model, temperature, top_p, max_tokens, do_sample)
-    else:
-        st.warning("请确保您已设置API Key和模型。")
+# 与AI聊天
+def chat_with_bot(client, user_input):
+    """与AI聊天并获取响应"""
+    if not user_input.strip():
+        st.warning("请输入有效内容")
         return
+    
+    # 添加用户消息到对话历史
+    user_timestamp = datetime.now().strftime("%H:%M:%S")
+    st.session_state.conversation_history.append({
+        "role": "user", 
+        "content": user_input,
+        "timestamp": user_timestamp
+    })
+    
+    # 显示用户消息
+    with st.chat_message("user"):
+        st.markdown(user_input)
+    
+    # 应用角色预设
+    role_manager = st.session_state.role_manager
+    selected_role = st.session_state.selected_role
+    
+    messages_for_api = []
+    if selected_role != "无角色预设":
+        role_card = role_manager.get_role(selected_role)
+        if role_card:
+            messages_for_api.append({"role": "system", "content": role_card["system_prompt"]})
+    
+    # 添加历史对话
+    max_history = 8  # 增加上下文长度
+    recent_history = st.session_state.conversation_history[-max_history:]
+    for msg in recent_history:
+        messages_for_api.append({"role": msg["role"], "content": msg["content"]})
+    
+    # 准备AI响应区域
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = ""
+        ai_timestamp = ""  # 初始化时间戳
+        
+        try:
+            # 流式响应处理
+            if st.session_state.streaming:
+                # 添加加载指示器
+                with st.spinner("🤔 思考中..."):
+                    response = client.chat.completions.create(
+                        model=st.session_state.model,
+                        messages=messages_for_api,
+                        stream=True,
+                        temperature=st.session_state.temperature,
+                        max_tokens=st.session_state.max_tokens,
+                        timeout=30  # 添加超时设置
+                    )
+                
+                # 处理流式响应
+                for chunk in response:
+                    if (
+                        chunk.choices 
+                        and len(chunk.choices) > 0 
+                        and chunk.choices[0].delta 
+                        and chunk.choices[0].delta.content is not None
+                    ):
+                        content = chunk.choices[0].delta.content
+                        full_response += content
+                        message_placeholder.markdown(full_response + "▌")
+                
+                # 移除光标符号
+                message_placeholder.markdown(full_response)
+            
+            # 非流式响应处理
+            else:
+                # 添加加载指示器
+                with st.spinner("🤔 思考中..."):
+                    response = client.chat.completions.create(
+                        model=st.session_state.model,
+                        messages=messages_for_api,
+                        stream=False,
+                        temperature=st.session_state.temperature,
+                        max_tokens=st.session_state.max_tokens,
+                        timeout=30  # 添加超时设置
+                    )
+                
+                # 获取完整响应内容
+                if response.choices and len(response.choices) > 0:
+                    full_response = response.choices[0].message.content
+                else:
+                    full_response = "未获取到有效响应"
+                
+                message_placeholder.markdown(full_response)
+            
+            # 生成AI响应时间戳
+            ai_timestamp = datetime.now().strftime("%H:%M:%S")
+            st.caption(f"<div style='text-align: right;'>{ai_timestamp}</div>", unsafe_allow_html=True)
+        
+        except Exception as e:
+            logger.error(f"API请求失败: {e}")
+            full_response = f"请求失败: {str(e)}"
+            message_placeholder.error(full_response)
+            ai_timestamp = datetime.now().strftime("%H:%M:%S")
+    
+    # 添加AI响应到对话历史
+    st.session_state.conversation_history.append({
+        "role": "assistant", 
+        "content": full_response,
+        "timestamp": ai_timestamp
+    })
 
-    # 如果对话历史不存在，初始化空对话历史
-    if 'conversation_history' not in st.session_state:
-        st.session_state.conversation_history = []
+# 滚动到底部的JavaScript
+def scroll_to_bottom():
+    """返回滚动到底部的JavaScript代码"""
+    return """
+    <script>
+        window.scrollTo(0, document.body.scrollHeight);
+    </script>
+    """
 
+# 主应用
+def main():
+    # 初始化会话状态
+    init_session_state()
+    
+    # 应用CSS样式
+    st.markdown("""
+        <style>
+            /* 精简样式 */
+            [data-testid="stChatMessage"] {
+                border-radius: 16px;
+                padding: 12px 16px;
+                margin: 8px 0;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+            [data-testid="stChatMessage"][aria-label="user"] {
+                background-color: #f0f7ff;
+                margin-left: auto;
+                max-width: 85%;
+            }
+            [data-testid="stChatMessage"][aria-label="assistant"] {
+                background-color: #f9f9f9;
+                margin-right: auto;
+                max-width: 85%;
+            }
+            .stButton>button {
+                border-radius: 20px;
+                padding: 8px 16px;
+                transition: all 0.3s;
+            }
+            .stButton>button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .role-card {
+                border: 1px solid #e0e0e0;
+                border-radius: 10px;
+                padding: 12px;
+                margin: 8px 0;
+                background-color: #f9f9f9;
+                transition: all 0.3s;
+            }
+            .role-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .stFileUploader > div > div {
+                padding: 8px;
+                border-radius: 8px;
+                border: 1px solid #e0e0e0;
+                transition: all 0.3s;
+            }
+            .stFileUploader > div > div:hover {
+                border-color: #4e8cff;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # 标题区域
+    st.title("🤖 俄罗斯文学助手")
+    st.caption("探索俄罗斯文学世界 · 角色卡增强版")
+    
+    # 渲染侧边栏
+    api_key = render_sidebar()
+    
+    # 初始化客户端
+    client = init_zhipu_client(api_key)
+    
+    # 聊天区域
+    if not st.session_state.conversation_history:
+        st.info("👋 您好！请提问俄罗斯文学相关问题，或从侧边栏选择角色预设")
+        # 添加一些俄罗斯文学相关的视觉元素
+        st.markdown("""
+            <div style="text-align:center; margin-top:20px; padding:20px; border-radius:12px; background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);">
+                <h4 style="color:#2c3e50;">📖 经典俄罗斯文学作品</h4>
+                <p style="font-size:1.1em; color:#34495e;">
+                    《战争与和平》 | 《罪与罚》 | 《安娜·卡列尼娜》<br>
+                    《卡拉马佐夫兄弟》 | 《静静的顿河》 | 《日瓦戈医生》
+                </p>
+                <div style="display:flex; justify-content:center; gap:15px; margin-top:15px;">
+                    <div style="background:#3498db; color:white; padding:8px 15px; border-radius:20px;">列夫·托尔斯泰</div>
+                    <div style="background:#e74c3c; color:white; padding:8px 15px; border-radius:20px;">陀思妥耶夫斯基</div>
+                    <div style="background:#2ecc71; color:white; padding:8px 15px; border-radius:20px;">契诃夫</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+    
     # 显示对话历史
-    display_conversation()
-
-    # 设置默认提示文本
-    prompt_options = [
-        "介绍俄罗斯文学概况",
-        "介绍一部俄罗斯文学作品",
-        "托尔斯泰的创作理念",
-        "聊一聊陀思妥耶夫斯基的主要作品",
-        "介绍俄国文学与西方文学的关系",
-        "分析普希金的文学贡献"
-    ]
-
-    # 提供选择框让用户选择预设的提示
-    selected_prompt = st.selectbox(
-        "选择一个提示：",
-        prompt_options,
-        index=0
-    )
-
-    # 用户输入框，默认填充选择的提示
-    user_input = st.text_input("用户输入：", value=selected_prompt, placeholder="在这里输入您的问题...") 
-
-    # 发送按钮
-    send_button = st.button("发送")
-
-    # 控制按钮点击或回车触发聊天
-    if send_button or (user_input and st.session_state.get("input_key", False)):
-        if not user_input.strip() and not send_button:
-            st.error("请输入有效的内容。")
-        else:
-            # 调用与机器人聊天的函数
-            chat_with_bot(client, st.session_state.conversation_history, user_input, model, temperature, top_p, max_tokens, do_sample)
-
-    # 页面底部说明
-    st.markdown(
-        """
-        ----
-        提示：如遇问题，请确保API Key正确且可正常访问ZhipuAI服务。
-        """
-    )
-    "[![在GitHub代码仓库中查看](https://github.com/codespaces/badge.svg)](https://github.com/limonthe/litchatbot)"
-    "[获取 API key](https://bigmodel.cn/?faitai.com)"
-    "[回到平台页面](https://limonthe.github.io/rebornlL/surface.html)"
-
-# 页面底部添加说明
-st.markdown("""
-    <style>
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #f1f1f1;
-            text-align: center;
-            padding: 10px;
-            font-size: 12px;
-        }
-    </style>
-    <div class="footer">
-        仍处开发调试中，望不吝赐教！ 525976102@qq.com。Ciallo～(∠・ω< )⌒★ 
-    </div>
-""", unsafe_allow_html=True)
+    for chat in st.session_state.conversation_history:
+        with st.chat_message(chat["role"]):
+            st.markdown(chat["content"])
+            if "timestamp" in chat:
+                st.caption(f"<div style='text-align:right;font-size:0.8em'>{chat['timestamp']}</div>", 
+                          unsafe_allow_html=True)
+    
+    # 用户输入区域
+    user_input = st.chat_input("输入俄罗斯文学问题...", key="chat_input")
+    
+    # 发送消息逻辑
+    if user_input and client:
+        chat_with_bot(client, user_input)
+        html(scroll_to_bottom(), height=0)
+    
+    # 页脚
+    st.markdown("---")
+    st.caption(f"俄罗斯文学助手 v3.2 | 支持角色卡导入/导出对话 | {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
 if __name__ == "__main__":
     main()
