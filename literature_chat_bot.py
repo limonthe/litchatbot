@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 # 页面配置
 st.set_page_config(
-    page_title="🤖💬 俄罗斯文学助手",
+    page_title="🤖💬 俄罗斯文学工具人",
     page_icon="📚",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        'About': "### 俄罗斯文学助手 - 探索俄罗斯文学瑰宝\n版本: 3.2 (API优化版)"
+        'About': "### 俄罗斯文学工具人 - 可能是文学助手吧\n版本: 0.2plus豪华版 (API与角色卡优化版)"
     }
 )
 
@@ -272,7 +272,7 @@ def render_role_management():
                 
                 cols = st.columns(2)
                 with cols[0]:
-                    if st.button("👤 使用此角色", key=f"manage_use_{manage_role}", use_container_width=True):
+                    if st.button("👤 确认", key=f"manage_use_{manage_role}", use_container_width=True):
                         st.session_state.selected_role = manage_role
                         st.rerun()
                 with cols[1]:
@@ -579,11 +579,11 @@ def main():
     
     # 聊天区域
     if not st.session_state.conversation_history:
-        st.info("👋 您好！请提问俄罗斯文学相关问题，或从侧边栏选择角色预设")
+        st.info("👋 Привет！👈侧边栏选择角色预设，👇下方可输入问题")
         # 添加一些俄罗斯文学相关的视觉元素
         st.markdown("""
             <div style="text-align:center; margin-top:20px; padding:20px; border-radius:12px; background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);">
-                <h4 style="color:#2c3e50;">📖 经典俄罗斯文学作品</h4>
+                <h4 style="color:#2c3e50;">📖 俄罗斯文学经典之作（这里不知道该放置什么元素了）</h4>
                 <p style="font-size:1.1em; color:#34495e;">
                     《战争与和平》 | 《罪与罚》 | 《安娜·卡列尼娜》<br>
                     《卡拉马佐夫兄弟》 | 《静静的顿河》 | 《日瓦戈医生》
@@ -605,7 +605,7 @@ def main():
                           unsafe_allow_html=True)
     
     # 用户输入区域
-    user_input = st.chat_input("输入俄罗斯文学问题...", key="chat_input")
+    user_input = st.chat_input("输入问题...", key="chat_input")
     
     # 发送消息逻辑
     if user_input and client:
@@ -618,3 +618,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
