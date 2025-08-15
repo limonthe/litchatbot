@@ -75,7 +75,7 @@
 filetree 
 ├── README.md
 ├── literature_chat_bot.py
-├── requirements.tst
+├── requirements.txt
 ├── images
 │  ├── logo.jpg
 └── run.bat
