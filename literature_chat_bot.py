@@ -138,7 +138,7 @@ class RoleCardManager:
 def init_session_state():
     """初始化会话状态"""
     defaults = {
-        "api_key": "",
+        "api_key": "b2d91dd347714bd19221022e62ffe5f4.v7vHaHaUDeN2x5uX",
         "model": "glm-4.5-flash",
         "conversation_history": [],
         "selected_role": "无角色预设",
@@ -600,6 +600,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
