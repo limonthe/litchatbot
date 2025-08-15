@@ -28,7 +28,7 @@ st.set_page_config(
 )
 
 # 从环境变量获取预置API Key，或者直接预置
-PREDEFINED_API_KEY = os.getenv("ZHIPU_API_KEY", "b2d91dd347714bd19221022e62ffe5f4.v7vHaHaUDeN2x5uX")
+PREDEFINED_API_KEY = os.getenv("ZHIPU_API_KEY", "")
 
 # 角色卡管理器
 class RoleCardManager:
@@ -618,6 +618,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
