@@ -614,8 +614,9 @@ def main():
     
     # 页脚
     st.markdown("---")
-    st.caption(f"俄罗斯文学助手 v3.2 | 支持角色卡导入/导出对话 | {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    st.caption(f"俄罗斯文学工具人 v0.2plus豪华版 | 支持角色卡导入/导出对话 | {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
 if __name__ == "__main__":
     main()
+
 
